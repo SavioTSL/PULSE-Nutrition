@@ -1,40 +1,42 @@
 # Auditoria — PULSE Nutrition
 
+Registro da versão anterior à inclusão do checkout e backend. As notas abaixo são daquela auditoria local, não uma certificação da nova operação de pagamentos. A arquitetura e os testes atuais estão descritos em [SETUP.md](SETUP.md).
+
 Revisão visual, funcional, de acessibilidade e desempenho. O README continua apenas com a apresentação do projeto.
 
 ## Resultado medido
 
 Lighthouse 12.8.2, perfil mobile padrão, Chromium headless, servidor local Python. Comparação feita com a mesma URL e ferramenta. São medições de laboratório; a Vercel, a rede e aparelhos reais podem apresentar resultados diferentes.
 
-| Indicador | Antes | Depois |
-| --- | ---: | ---: |
-| Desempenho | 69 | 92 |
-| Acessibilidade | 100 | 100 |
-| Boas práticas | 100 | 100 |
-| SEO | 100 | 100 |
-| Primeiro conteúdo visível (FCP) | 3,0 s | 1,5 s |
-| Maior conteúdo visível (LCP) | 5,3 s | 3,3 s |
-| Deslocamento de layout (CLS) | 0,143 | 0 |
-| Bloqueio total (TBT) | 0 ms | 70 ms |
+| Indicador                       | Antes | Depois |
+| ------------------------------- | ----: | -----: |
+| Desempenho                      |    69 |     92 |
+| Acessibilidade                  |   100 |    100 |
+| Boas práticas                   |   100 |    100 |
+| SEO                             |   100 |    100 |
+| Primeiro conteúdo visível (FCP) | 3,0 s |  1,5 s |
+| Maior conteúdo visível (LCP)    | 5,3 s |  3,3 s |
+| Deslocamento de layout (CLS)    | 0,143 |      0 |
+| Bloqueio total (TBT)            |  0 ms |  70 ms |
 
 O TBT final permanece abaixo de 200 ms, referência de bom resultado do Lighthouse. O LCP ainda pode melhorar: a referência de bom resultado é até 2,5 s. Os valores observados estão em [reports/audit-metrics.json](reports/audit-metrics.json).
 
 ## Problemas corrigidos
 
-| Área | Problema encontrado | Alteração |
-| --- | --- | --- |
-| Identidade visual | Quatro categorias ainda usavam desenhos planos | Novas embalagens 3D de pré-treino, vitaminas, barra e shaker, aplicadas nas categorias, produtos, detalhes e carrinho |
-| Consistência da marca | Whey tinha símbolo de registro e um artefato lateral na imagem | Limpeza da imagem; a marca segue identificada como fictícia |
-| Desempenho | Fontes TTF pesadas, CSS/JS sem minificação e fotos JPEG | Fontes WOFF2 com subconjunto latino, preload das fontes principais, CSS e JS minificados, fotos WebP |
-| Imagens | Categorias baixavam a mesma imagem grande do modal | Versões responsivas de 320 e 640 px com `srcset` e `sizes`; imagem principal com prioridade de carregamento |
-| Escolha de produto | Favoritar um item restaurava o primeiro sabor | Variação selecionada preservada ao atualizar favoritos e filtros |
-| Carrinho | Adição acima de 99 descartava o excedente e apresentava sucesso | Adição recusada com mensagem clara; nenhuma quantidade descartada silenciosamente |
-| Validação | Índice negativo poderia remover a última linha pelo método do carrinho | Índices de remoção validados |
-| Teclado | Foco podia desaparecer ao remover o último favorito | Foco retorna ao controle de favoritos |
-| Teclado | Header podia continuar escondido com links focados | Header aparece ao receber foco e permanece visível enquanto é usado por teclado |
-| Carrossel | Autoplay podia reiniciar durante interação por teclado | Pausa enquanto o foco está dentro do hero |
-| Mobile | Favoritos e ajuste de quantidade tinham alvos pequenos | Ações principais com áreas de toque de pelo menos 44 × 44 px; textos comerciais maiores |
-| Nomes acessíveis | Nome do logo e texto do botão de pausa geravam alerta no Lighthouse | Nome natural do logo e controles de reprodução em SVG com descrição acessível |
+| Área                  | Problema encontrado                                                    | Alteração                                                                                                             |
+| --------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Identidade visual     | Quatro categorias ainda usavam desenhos planos                         | Novas embalagens 3D de pré-treino, vitaminas, barra e shaker, aplicadas nas categorias, produtos, detalhes e carrinho |
+| Consistência da marca | Whey tinha símbolo de registro e um artefato lateral na imagem         | Limpeza da imagem; a marca segue identificada como fictícia                                                           |
+| Desempenho            | Fontes TTF pesadas, CSS/JS sem minificação e fotos JPEG                | Fontes WOFF2 com subconjunto latino, preload das fontes principais, CSS e JS minificados, fotos WebP                  |
+| Imagens               | Categorias baixavam a mesma imagem grande do modal                     | Versões responsivas de 320 e 640 px com `srcset` e `sizes`; imagem principal com prioridade de carregamento           |
+| Escolha de produto    | Favoritar um item restaurava o primeiro sabor                          | Variação selecionada preservada ao atualizar favoritos e filtros                                                      |
+| Carrinho              | Adição acima de 99 descartava o excedente e apresentava sucesso        | Adição recusada com mensagem clara; nenhuma quantidade descartada silenciosamente                                     |
+| Validação             | Índice negativo poderia remover a última linha pelo método do carrinho | Índices de remoção validados                                                                                          |
+| Teclado               | Foco podia desaparecer ao remover o último favorito                    | Foco retorna ao controle de favoritos                                                                                 |
+| Teclado               | Header podia continuar escondido com links focados                     | Header aparece ao receber foco e permanece visível enquanto é usado por teclado                                       |
+| Carrossel             | Autoplay podia reiniciar durante interação por teclado                 | Pausa enquanto o foco está dentro do hero                                                                             |
+| Mobile                | Favoritos e ajuste de quantidade tinham alvos pequenos                 | Ações principais com áreas de toque de pelo menos 44 × 44 px; textos comerciais maiores                               |
+| Nomes acessíveis      | Nome do logo e texto do botão de pausa geravam alerta no Lighthouse    | Nome natural do logo e controles de reprodução em SVG com descrição acessível                                         |
 
 ## Validações executadas
 

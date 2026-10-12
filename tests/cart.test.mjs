@@ -71,3 +71,23 @@ test("não descarta quantidades excedentes nem remove índices inválidos", () =
   assert.equal(cart.remove(10), false);
   assert.equal(cart.count, 99);
 });
+
+test("estoque real limita adições sem modificar a quantidade solicitada", () => {
+  const product = products[0],
+    demo = product.demonstrative,
+    stock = product.variantStock;
+  try {
+    product.demonstrative = false;
+    product.variantStock = { [product.variants[0]]: 2 };
+    const cart = new Cart();
+    assert.equal(cart.add(product.id, product.variants[0], 3), false);
+    assert.equal(cart.lastError, "STOCK_LIMIT");
+    assert.equal(cart.add(product.id, product.variants[0], 2), true);
+    assert.equal(cart.add(product.id, product.variants[0], 1), false);
+    assert.equal(cart.set(0, 3), false);
+    assert.equal(cart.count, 2);
+  } finally {
+    product.demonstrative = demo;
+    product.variantStock = stock;
+  }
+});

@@ -2,8 +2,8 @@
 
 **Sua evolução começa aqui.**
 
-E-commerce demonstrativo de suplementos alimentares, criado para portfólio e apresentação comercial. A identidade combina uma estética esportiva e premium com navegação intuitiva em desktop e mobile.
+E-commerce de suplementos alimentares com identidade esportiva e premium, desenvolvido em HTML, CSS e JavaScript puro.
 
-Desenvolvido com HTML, CSS e JavaScript puro, o projeto inclui catálogo com pesquisa e filtros, detalhes e variações de produtos, favoritos, carrinho persistente e preparação de orçamento para WhatsApp.
+O projeto reúne catálogo, pesquisa e filtros, favoritos, carrinho, checkout com Mercado Pago, acompanhamento de pedidos e painel administrativo com login, produtos, estoque e gestão de pedidos. O backend utiliza Node.js e PostgreSQL.
 
-A marca, os produtos e os preços são fictícios. O site não realiza vendas ou pagamentos reais.
+O catálogo inicial é demonstrativo. Pagamentos reais dependem da configuração dos serviços e do cadastro de produtos reais pela administração.

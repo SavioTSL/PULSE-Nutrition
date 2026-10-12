@@ -1,4 +1,4 @@
-import { products, money } from "./products.js";
+import { products, money, priceFor } from "./products.js";
 export const CART_KEY = "pulse-cart-v1";
 export function safeRead(key, fallback) {
   try {
@@ -46,9 +46,11 @@ export class Cart {
   }
   save() {
     const stored = persist(CART_KEY, this.items);
+    this.persisted = stored;
     window.dispatchEvent(new CustomEvent("cartchange", { detail: { stored } }));
   }
   add(id, variant, qty = 1) {
+    this.lastError = null;
     const p = products.find((p) => p.id === id);
     if (
       !p ||
@@ -59,7 +61,18 @@ export class Cart {
     )
       return false;
     const item = this.items.find((i) => i.id === id && i.variant === variant);
-    if (item && item.qty + qty > 99) return false;
+    if (item && item.qty + qty > 99) {
+      this.lastError = "QUANTITY_LIMIT";
+      return false;
+    }
+    if (
+      p.demonstrative === false &&
+      Number.isInteger(p.variantStock?.[variant]) &&
+      (item?.qty || 0) + qty > p.variantStock[variant]
+    ) {
+      this.lastError = "STOCK_LIMIT";
+      return false;
+    }
     if (item) item.qty += qty;
     else this.items.push({ id, variant, qty });
     this.save();
@@ -68,6 +81,16 @@ export class Cart {
   set(index, qty) {
     if (!this.items[index] || !Number.isInteger(qty) || qty < 1 || qty > 99)
       return false;
+    const current = this.items[index],
+      p = products.find((p) => p.id === current.id);
+    if (
+      p.demonstrative === false &&
+      Number.isInteger(p.variantStock?.[current.variant]) &&
+      qty > p.variantStock[current.variant]
+    ) {
+      this.lastError = "STOCK_LIMIT";
+      return false;
+    }
     this.items[index].qty = qty;
     this.save();
     return true;
@@ -84,20 +107,29 @@ export class Cart {
   }
   get total() {
     return this.items.reduce(
-      (sum, i) => sum + products.find((p) => p.id === i.id).price * i.qty,
+      (sum, i) =>
+        sum +
+        priceFor(
+          products.find((p) => p.id === i.id),
+          i.variant,
+        ) *
+          i.qty,
       0,
     );
   }
   summary() {
+    const demo = this.items.some(
+      (item) => products.find((p) => p.id === item.id)?.demonstrative !== false,
+    );
     return (
-      "PULSE Nutrition — solicitação de orçamento demonstrativo\n\n" +
+      `PULSE Nutrition — solicitação de orçamento${demo ? " demonstrativo" : ""}\n\n` +
       this.items
         .map((i) => {
           const p = products.find((p) => p.id === i.id);
-          return `${i.qty} × ${p.name} (${i.variant}) — ${money(p.price * i.qty)}`;
+          return `${i.qty} × ${p.name} (${i.variant}) — ${money(priceFor(p, i.variant) * i.qty)}`;
         })
         .join("\n") +
-      `\n\nSubtotal ilustrativo: ${money(this.total)}\nFrete e disponibilidade a consultar. Não é confirmação de pedido ou pagamento.`
+      `\n\nSubtotal${demo ? " ilustrativo" : ""}: ${money(this.total)}\nFrete e disponibilidade a consultar. Não é confirmação de pedido ou pagamento.`
     );
   }
 }

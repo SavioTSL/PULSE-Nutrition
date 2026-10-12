@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Finalizar pedido — PULSE Nutrition</title>
+    <link rel="icon" href="assets/favicon.svg" />
+    <link rel="stylesheet" href="css/app.css" />
+    <link rel="stylesheet" href="css/commerce.css" />
+    <script src="js/checkout-app.js" defer></script>
+  </head>
+  <body class="commerce-body">
+    <header class="commerce-header">
+      <a class="logo" href="index.html">PULSE<span>NUTRITION</span><i></i></a
+      ><a href="index.html#catalogo" class="text-link">← Continuar comprando</a>
+    </header>
+    <main class="checkout-layout">
+      <section>
+        <p class="eyebrow">SEU PRÓXIMO PASSO</p>
+        <h1>FINALIZAR <em>PEDIDO.</em></h1>
+        <div class="step-list">
+          <span class="current">01 · Dados e entrega</span
+          ><span>02 · Pix ou cartão</span><span>03 · Acompanhamento</span>
+        </div>
+        <div id="checkout-notice" class="notice" role="status">
+          Verificando disponibilidade do pagamento...
+        </div>
+        <form id="checkout-form">
+          <fieldset>
+            <legend>Seus dados</legend>
+            <div class="form-grid">
+              <label
+                >Nome completo<input
+                  name="name"
+                  autocomplete="name"
+                  required
+                  maxlength="120" /></label
+              ><label
+                >E-mail<input
+                  name="email"
+                  type="email"
+                  autocomplete="email"
+                  required
+                  maxlength="254" /></label
+              ><label
+                >WhatsApp / telefone<input
+                  name="phone"
+                  type="tel"
+                  autocomplete="tel"
+                  required
+                  maxlength="20"
+              /></label>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>Endereço de entrega</legend>
+            <div class="form-grid">
+              <label
+                >CEP<input
+                  name="zip"
+                  inputmode="numeric"
+                  autocomplete="postal-code"
+                  required
+                  maxlength="9"
+                  placeholder="00000-000" /></label
+              ><label class="wide"
+                >Rua / avenida<input
+                  name="street"
+                  autocomplete="address-line1"
+                  required
+                  maxlength="160" /></label
+              ><label
+                >Número<input name="number" required maxlength="20" /></label
+              ><label
+                >Complemento <small>(opcional)</small
+                ><input
+                  name="complement"
+                  autocomplete="address-line2"
+                  maxlength="100" /></label
+              ><label
+                >Bairro<input
+                  name="neighborhood"
+                  required
+                  maxlength="100" /></label
+              ><label
+                >Cidade<input
+                  name="city"
+                  autocomplete="address-level2"
+                  required
+                  maxlength="100" /></label
+              ><label
+                >Estado<select
+                  name="state"
+                  autocomplete="address-level1"
+                  required
+                >
+                  <option value="">Selecione</option>
+                </select></label
+              >
+            </div>
+          </fieldset>
+          <p class="payment-explanation">
+            Você será direcionado ao Mercado Pago para escolher Pix ou cartão. A
+            confirmação aparece somente após a verificação do pagamento pelo
+            servidor.
+          </p>
+          <label class="check-label"
+            ><input name="consent" type="checkbox" required /><span>
+              Li os dados do pedido e as
+              <a href="privacidade.html" target="_blank" rel="noopener"
+                >informações de privacidade</a
+              >.</span
+            ></label
+          ><button id="pay-button" type="submit" class="button lime" disabled>
+            Ir para pagamento ↗
+          </button>
+          <div
+            id="checkout-error"
+            role="alert"
+            class="notice error"
+            hidden
+          ></div>
+        </form>
+      </section>
+      <aside class="order-summary-panel">
+        <h2>SUA <em>SELEÇÃO.</em></h2>
+        <div id="checkout-items"></div>
+        <div class="totals">
+          <div><span>Produtos</span><b id="checkout-subtotal"></b></div>
+          <div>
+            <span>Frete</span><b id="checkout-shipping">A configurar</b>
+          </div>
+          <div class="grand-total">
+            <span>Total</span><b id="checkout-total"></b>
+          </div>
+        </div>
+        <p>
+          Preços, estoque e frete são conferidos novamente no servidor. A tela
+          de retorno não confirma pagamento por conta própria.
+        </p>
+        <a href="index.html#catalogo" class="text-link">Alterar seleção ↗</a>
+      </aside>
+    </main>
+    <footer class="commerce-footer">
+      PULSE Nutrition · <a href="pedidos.html">Meus pedidos</a> ·
+      <a href="privacidade.html">Privacidade</a>
+    </footer>
+  </body>
+</html>

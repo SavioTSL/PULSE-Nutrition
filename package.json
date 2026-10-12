@@ -1,0 +1,22 @@
+{
+  "name": "pulse-nutrition",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env dev/server.mjs",
+    "build": "sh scripts/build.sh",
+    "test": "node --test tests/cart.test.mjs tests/backend.test.mjs",
+    "db:setup": "node --env-file-if-exists=.env scripts/setup-db.mjs",
+    "admin:password": "node scripts/admin-password.mjs"
+  },
+  "dependencies": {
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.8"
+  }
+}

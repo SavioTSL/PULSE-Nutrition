@@ -1,6 +1,18 @@
-import { imagePath, imageSources, renderProductCards } from "./catalog.js";
-import { products, categories, money } from "./products.js";
-import { Cart, safeRead, persist } from "./cart.js";
+import { api, escapeHTML } from "./safe.js";
+import {
+  imagePath,
+  imageSources,
+  productImage,
+  renderProductCards,
+} from "./catalog.js";
+import {
+  products,
+  categories,
+  money,
+  priceFor,
+  replaceProducts,
+} from "./products.js";
+import { Cart, safeRead, persist, normalize } from "./cart.js";
 const $ = (s) => document.querySelector(s),
   $$ = (s) => [...document.querySelectorAll(s)];
 const icons = {
@@ -32,13 +44,59 @@ let category = "all",
   onlyFavorites = false,
   toastTimer;
 const selectedVariants = new Map();
+let loadingStore = true;
 function toast(message) {
-  $("#toast").textContent = message;
-  $("#toast").classList.add("visible");
+  const dialog = $("dialog[open]");
+  let target = $("#toast");
+  if (dialog) {
+    target = dialog.querySelector(".dialog-feedback");
+    if (!target) {
+      target = document.createElement("div");
+      target.className = "dialog-feedback";
+      target.setAttribute("role", "status");
+      target.setAttribute("aria-live", "polite");
+      dialog.append(target);
+    }
+    $("#toast").classList.remove("visible");
+  }
+  target.textContent = message;
+  target.hidden = false;
+  target.classList.add("visible");
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => $("#toast").classList.remove("visible"), 3500);
+  toastTimer = setTimeout(() => {
+    target.classList.remove("visible");
+    if (target.classList.contains("dialog-feedback")) target.hidden = true;
+  }, 4500);
 }
-const asset = (p) => imagePath(p.image);
+function cartMessage(message) {
+  return cart.persisted === false
+    ? `${message} Armazenamento indisponível: salvo apenas nesta sessão.`
+    : message;
+}
+const normalizeSearch = (value) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+const asset = productImage;
+const inStock = (p, variant) =>
+  p.demonstrative !== false ||
+  !Number.isInteger(p.variantStock?.[variant]) ||
+  p.variantStock[variant] > 0;
+function updateCardStock(card, p) {
+  const ready = inStock(p, card.querySelector("[data-variant]").value);
+  card.querySelector("[data-add]").disabled = loadingStore || !ready;
+  card
+    .querySelectorAll("[data-detail]")
+    .forEach((button) => (button.disabled = loadingStore));
+  if (p.demonstrative === false)
+    card.querySelector(".product-info small").textContent = ready
+      ? "Preço à vista · disponível"
+      : "Indisponível no momento";
+}
 $("#category-grid").innerHTML = categories
   .map(
     (c, i) =>
@@ -58,21 +116,15 @@ function renderProducts() {
       card.querySelector("[data-variant]").value,
     ),
   );
-  const query = $("#search")
-    .value.trim()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
+  const terms = normalizeSearch($("#search").value).split(" ").filter(Boolean);
   let list = products.filter(
     (p) =>
       (category === "all" || p.category === category) &&
       p.price <= Number($("#price").value) * 100 &&
       (!onlyFavorites || favorites.includes(p.id)) &&
-      p.name
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .includes(query),
+      terms.every((term) =>
+        normalizeSearch(`${p.name} ${p.category} ${p.brand}`).includes(term),
+      ),
   );
   const sort = $("#sort").value;
   if (sort === "price-up") list.sort((a, b) => a.price - b.price);
@@ -98,6 +150,9 @@ function renderProducts() {
     const select = card.querySelector("[data-variant]");
     if (value && [...select.options].some((option) => option.value === value))
       select.value = value;
+    const p = products.find((p) => p.id === card.dataset.id);
+    card.querySelector(".price").textContent = money(priceFor(p, select.value));
+    updateCardStock(card, p);
   });
 }
 function reset() {
@@ -151,10 +206,16 @@ $("#search-toggle").addEventListener("click", () => {
   $("#catalogo").scrollIntoView({ behavior: "auto" });
   $("#search").focus();
 });
-let returnFocus;
+const dialogTriggers = new WeakMap();
 function openDialog(d) {
   if (d.open) return;
-  returnFocus = document.activeElement;
+  const previous = $("dialog[open]");
+  const trigger = previous
+    ? dialogTriggers.get(previous)
+    : document.activeElement;
+  if (previous) previous.close();
+  dialogTriggers.set(d, trigger);
+  d.querySelector(".dialog-feedback")?.remove();
   $("#header").classList.remove("away");
   d.showModal();
   document.body.classList.add("modal-open");
@@ -162,9 +223,15 @@ function openDialog(d) {
 }
 $$("dialog").forEach((d) => {
   d.addEventListener("close", () => {
-    document.body.classList.remove("modal-open");
-    returnFocus?.focus({ preventScroll: true });
-    schedule();
+    const anyOpen = $$("dialog").some((dialog) => dialog.open);
+    document.body.classList.toggle("modal-open", anyOpen);
+    if (!anyOpen) {
+      const trigger = dialogTriggers.get(d);
+      (trigger?.isConnected ? trigger : $("#cart-open")).focus({
+        preventScroll: true,
+      });
+      schedule();
+    }
   });
   d.addEventListener("click", (e) => {
     if (e.target.closest("[data-close]")) d.close();
@@ -184,7 +251,31 @@ function detail(id) {
   const p = products.find((p) => p.id === id);
   if (!p) return;
   $("#product-detail").innerHTML =
-    `<div class="product-detail-grid"><div class="detail-gallery"><img id="gallery-main" src="${asset(p)}" alt="${p.name}, vista da embalagem ilustrativa" width="500" height="500"><div class="gallery-thumbs"><button data-view="front" aria-label="Vista da embalagem" aria-pressed="true"><img src="${asset(p)}" alt=""></button><button data-view="back" aria-label="Ver rótulo demonstrativo" aria-pressed="false"><img src="assets/product-label.svg" alt=""></button><button data-view="zoom" aria-label="Ampliar embalagem" aria-pressed="false"><img src="${asset(p)}" alt=""></button></div></div><div class="detail-copy"><p class="eyebrow">${p.brand} · PRODUTO DEMONSTRATIVO</p><h2 id="detail-title">${p.name}</h2><div class="price">${money(p.price)}</div><p>${p.description}</p><label for="detail-variant">Escolha sua variação</label><select id="detail-variant">${p.variants.map((v) => `<option>${v}</option>`).join("")}</select><label for="detail-qty">Quantidade</label><div class="qty-control"><button id="qty-minus" aria-label="Diminuir quantidade">−</button><input id="detail-qty" type="number" min="1" max="99" value="1" inputmode="numeric"><button id="qty-plus" aria-label="Aumentar quantidade">+</button></div><button id="detail-add" class="button dark">Adicionar à seleção +</button><div class="label-info"><strong>Informações ilustrativas do rótulo</strong><p>${p.label}</p><p>Não é recomendação de consumo. Consulte orientação profissional. Imagens demonstrativas; tamanho e sabor não alteram o preço ilustrativo.</p></div></div></div>`;
+    `<div class="product-detail-grid"><div class="detail-gallery"><img id="gallery-main" src="${escapeHTML(asset(p))}" alt="${escapeHTML(p.name)}, vista da embalagem ilustrativa" width="500" height="500"><div class="gallery-thumbs"><button data-view="front" aria-label="Vista da embalagem" aria-pressed="true"><img src="${escapeHTML(asset(p))}" alt=""></button><button data-view="back" aria-label="Ver rótulo demonstrativo" aria-pressed="false"><img src="assets/product-label.svg" alt=""></button><button data-view="zoom" aria-label="Ampliar embalagem" aria-pressed="false"><img src="${escapeHTML(asset(p))}" alt=""></button></div></div><div class="detail-copy"><p class="eyebrow">${escapeHTML(p.brand)}${p.demonstrative !== false ? " · PRODUTO DEMONSTRATIVO" : ""}</p><h2 id="detail-title">${escapeHTML(p.name)}</h2><div class="price">${money(p.price)}</div><p>${escapeHTML(p.description)}</p><label for="detail-variant">Escolha sua variação</label><select id="detail-variant">${p.variants.map((v) => `<option>${escapeHTML(v)}</option>`).join("")}</select><label for="detail-qty">Quantidade</label><div class="qty-control"><button id="qty-minus" aria-label="Diminuir quantidade">−</button><input id="detail-qty" type="number" min="1" max="99" value="1" inputmode="numeric"><button id="qty-plus" aria-label="Aumentar quantidade">+</button></div><button id="detail-add" class="button dark">Adicionar à seleção +</button><button id="detail-view-cart" class="button lime" hidden>Ver carrinho ↗</button><div class="label-info"><strong>Informações ilustrativas do rótulo</strong><p>${escapeHTML(p.label)}</p><p>Não é recomendação de consumo. Consulte orientação profissional. Imagens demonstrativas; tamanho e sabor não alteram o preço ilustrativo.</p></div></div></div>`;
+  const cardVariant = $(`[data-id="${p.id}"] [data-variant]`);
+  $("#detail-variant").value =
+    cardVariant?.value || selectedVariants.get(p.id) || p.variants[0];
+  $("#detail-variant").addEventListener("change", () => {
+    selectedVariants.set(p.id, $("#detail-variant").value);
+    if (cardVariant) {
+      cardVariant.value = $("#detail-variant").value;
+      cardVariant.closest(".product-card").querySelector(".price").textContent =
+        money(priceFor(p, cardVariant.value));
+    }
+    $(".detail-copy .price").textContent = money(
+      priceFor(p, $("#detail-variant").value),
+    );
+    $("#detail-add").disabled = !inStock(p, $("#detail-variant").value);
+    $("#detail-add").disabled = !inStock(p, $("#detail-variant").value);
+  });
+  $(".detail-copy .price").textContent = money(
+    priceFor(p, $("#detail-variant").value),
+  );
+  $("#detail-add").disabled = !inStock(p, $("#detail-variant").value);
+  $("#detail-view-cart").addEventListener("click", () => {
+    renderCart();
+    openDialog($("#cart-dialog"));
+  });
   // Labels em português para leitores de tela.
   $("#gallery-main").alt = `${p.name}, vista da embalagem ilustrativa`;
   $$("[data-view]")[0].ariaLabel = "Vista da embalagem";
@@ -193,12 +284,19 @@ function detail(id) {
     const qty = Number($("#detail-qty").value);
     if (!cart.add(p.id, $("#detail-variant").value, qty)) {
       toast(
-        "Use uma quantidade inteira de 1 a 99, respeitando o limite de 99 por variação no carrinho.",
+        cart.lastError === "STOCK_LIMIT"
+          ? "A quantidade excede o estoque disponível para esta variação."
+          : "Use uma quantidade inteira de 1 a 99, respeitando o limite de 99 por variação no carrinho.",
       );
       $("#detail-qty").focus();
       return;
     }
-    toast("Produto adicionado à sua seleção.");
+    $("#detail-view-cart").hidden = false;
+    toast(
+      cartMessage(
+        "Produto adicionado à sua seleção. Abra o carrinho para continuar.",
+      ),
+    );
   });
   function changeQty(delta) {
     const n = Number($("#detail-qty").value);
@@ -223,18 +321,28 @@ function detail(id) {
       );
     }),
   );
-  let touchX;
+  let touchStart;
   $(".detail-gallery").addEventListener(
     "touchstart",
-    (e) => (touchX = e.changedTouches[0].clientX),
+    (e) => {
+      touchStart = {
+        x: e.changedTouches[0].clientX,
+        y: e.changedTouches[0].clientY,
+      };
+    },
     { passive: true },
   );
   $(".detail-gallery").addEventListener(
     "touchend",
     (e) => {
-      if (Math.abs(e.changedTouches[0].clientX - touchX) > 40) {
+      if (!touchStart) return;
+      const dx = e.changedTouches[0].clientX - touchStart.x;
+      const dy = e.changedTouches[0].clientY - touchStart.y;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
         const active = $('[data-view][aria-pressed="true"]');
-        $$("[data-view]")[($$("[data-view]").indexOf(active) + 1) % 3].click();
+        $$("[data-view]")[
+          ($$("[data-view]").indexOf(active) + (dx < 0 ? 1 : 2)) % 3
+        ].click();
       }
     },
     { passive: true },
@@ -268,8 +376,10 @@ $("#product-grid").addEventListener("click", (e) => {
     );
     toast(
       added
-        ? "Produto adicionado à sua seleção."
-        : "Limite de 99 unidades por produto e variação atingido.",
+        ? cartMessage("Produto adicionado à sua seleção.")
+        : cart.lastError === "STOCK_LIMIT"
+          ? "A quantidade excede o estoque disponível para esta variação."
+          : "Limite de 99 unidades por produto e variação atingido.",
     );
   } else if (details) detail(details.dataset.detail);
 });
@@ -282,7 +392,7 @@ function renderCart() {
     ? cart.items
         .map((item, index) => {
           const p = products.find((p) => p.id === item.id);
-          return `<article class="cart-item"><img src="${asset(p)}" alt="" width="80" height="80"><div><h3>${p.name}</h3><p>${item.variant}</p><strong>${money(p.price * item.qty)}</strong><div class="cart-item-bottom"><div class="cart-qty"><button data-index="${index}" data-delta="-1" aria-label="Diminuir quantidade de ${p.name}" ${item.qty === 1 ? "disabled" : ""}>−</button><span aria-label="Quantidade">${item.qty}</span><button data-index="${index}" data-delta="1" aria-label="Aumentar quantidade de ${p.name}" ${item.qty === 99 ? "disabled" : ""}>+</button></div><button class="remove-btn" data-remove="${index}" aria-label="Remover ${p.name} do carrinho">Remover</button></div></div></article>`;
+          return `<article class="cart-item"><img src="${escapeHTML(asset(p))}" alt="" width="80" height="80"><div><h3>${escapeHTML(p.name)}</h3><p>${escapeHTML(item.variant)}</p><strong>${money(priceFor(p, item.variant) * item.qty)}</strong><div class="cart-item-bottom"><div class="cart-qty"><button data-index="${index}" data-delta="-1" aria-label="Diminuir quantidade de ${escapeHTML(p.name)}" ${item.qty === 1 ? "disabled" : ""}>−</button><span aria-label="Quantidade">${item.qty}</span><button data-index="${index}" data-delta="1" aria-label="Aumentar quantidade de ${escapeHTML(p.name)}" ${item.qty >= Math.min(99, p.demonstrative === false ? (p.variantStock?.[item.variant] ?? 99) : 99) ? "disabled" : ""}>+</button></div><button class="remove-btn" data-remove="${index}" aria-label="Remover ${escapeHTML(p.name)} do carrinho">Remover</button></div></div></article>`;
         })
         .join("")
     : `<div class="empty-state"><h3>Seu carrinho está esperando.</h3><p>Explore o catálogo e encontre seus essenciais.</p><button class="button dark" id="cart-explore">Explorar produtos ↗</button></div>`;
@@ -518,8 +628,11 @@ $("#clear-data").addEventListener("click", () => {
   persist(favoriteKey, []);
   cart.items = [];
   cart.save();
+  try {
+    localStorage.removeItem("pulse-orders-v1");
+  } catch {}
   renderProducts();
-  toast("Carrinho e favoritos apagados.");
+  toast("Carrinho, favoritos e acesso aos pedidos apagados deste navegador.");
 });
 const endpoint = window.PULSE_CONFIG?.newsletterEndpoint || "";
 if (!endpoint) {
@@ -572,3 +685,74 @@ if ("IntersectionObserver" in window && !motion.matches) {
 renderProducts();
 renderCart();
 updatePause();
+
+$("#product-grid").addEventListener("change", (event) => {
+  const select = event.target.closest("[data-variant]");
+  if (!select) return;
+  const card = select.closest(".product-card"),
+    p = products.find((p) => p.id === card.dataset.id);
+  selectedVariants.set(p.id, select.value);
+  card.querySelector(".price").textContent = money(priceFor(p, select.value));
+  updateCardStock(card, p);
+});
+async function loadStore() {
+  try {
+    const status = await api("status");
+    window.PULSE_STORE_STATUS = status;
+    if (status.whatsapp)
+      window.PULSE_CONFIG = {
+        ...window.PULSE_CONFIG,
+        whatsappNumber: status.whatsapp,
+      };
+    if (status.databaseReady) {
+      const data = await api("products");
+      replaceProducts(data.products);
+      cart.items = normalize(safeRead("pulse-cart-v1", []));
+      renderProducts();
+      renderCart();
+    }
+    if (status.checkoutEnabled) {
+      $("#purchase-notice").textContent = status.sandbox
+        ? "Pagamentos em ambiente de teste do Mercado Pago."
+        : "Pix e cartão pelo Mercado Pago. Confira seu pedido antes de pagar.";
+      $(".announcement").textContent = status.sandbox
+        ? "PULSE NUTRITION · AMBIENTE DE TESTES DE PAGAMENTO"
+        : "PULSE NUTRITION · PIX E CARTÃO PELO MERCADO PAGO";
+      $(".subtotal span").textContent = "Subtotal";
+      const about = $$("#sobre p:not(.eyebrow)");
+      if (about[1])
+        about[1].textContent =
+          "O catálogo é gerenciado pela loja. Confira informações, variações e disponibilidade antes de finalizar seu pedido.";
+      const questions = $$("#faq details");
+      if (questions[0])
+        questions[0].querySelector("p").textContent = status.sandbox
+          ? "O checkout está no ambiente de testes do Mercado Pago, sem cobranças reais. Produtos demonstrativos não podem ser enviados para pagamento."
+          : "Produtos reais com estoque podem ser comprados pelo checkout do Mercado Pago. Produtos marcados como demonstrativos não recebem cobranças.";
+      if (questions[1]) {
+        questions[1].querySelector("summary").textContent =
+          "Como finalizo meu pedido?";
+        questions[1].querySelector("p").textContent =
+          "Monte seu carrinho, clique em continuar para finalizar, informe seus dados e endereço e siga para o Mercado Pago. Acompanhe a confirmação na página do pedido.";
+      }
+      if (questions[2])
+        questions[2].querySelector("p").textContent =
+          "Confira a identificação de cada item. Produtos marcados como demonstrativos são fictícios. Os demais são cadastrados pela loja, que administra suas informações e disponibilidade.";
+      $(".catalog-footnote").textContent =
+        "Confira produtos, variações e disponibilidade. Itens marcados como demonstrativos não podem receber pagamentos.";
+      $(".footer-bottom").lastElementChild.textContent =
+        "Pagamento e disponibilidade são confirmados no checkout.";
+      $("#cart-footer > p").textContent =
+        "Frete informado no checkout. Pagamentos processados pelo Mercado Pago.";
+    } else
+      $("#purchase-notice").textContent =
+        "Checkout disponível como tela; pagamentos aguardam configuração da loja.";
+  } catch {
+    $("#purchase-notice").textContent =
+      "Catálogo de demonstração. Para pagamentos e administração, publique com o backend configurado.";
+  }
+  loadingStore = false;
+  renderProducts();
+  renderCart();
+  document.dispatchEvent(new Event("pulse-store-ready"));
+}
+loadStore();

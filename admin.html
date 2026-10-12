@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Administração — PULSE Nutrition</title>
+    <link rel="icon" href="assets/favicon.svg" />
+    <link rel="stylesheet" href="css/app.css" />
+    <link rel="stylesheet" href="css/commerce.css" />
+    <script src="js/admin-app.js" defer></script>
+  </head>
+  <body class="admin-body">
+    <section id="admin-login" class="admin-login">
+      <a class="logo" href="index.html">PULSE<span>NUTRITION</span><i></i></a>
+      <p class="eyebrow">GESTÃO DA LOJA</p>
+      <h1>SEU NEGÓCIO.<br />NO SEU <em>RITMO.</em></h1>
+      <p>Produtos, estoque e pedidos em um único lugar.</p>
+      <form id="login-form">
+        <label
+          >E-mail administrativo<input
+            id="admin-email"
+            type="email"
+            autocomplete="username"
+            required
+            maxlength="254" /></label
+        ><label
+          >Senha<input
+            id="admin-password"
+            type="password"
+            autocomplete="current-password"
+            required
+            minlength="12"
+            maxlength="128" /></label
+        ><button class="button lime" id="login-button" type="submit">
+          Entrar no painel ↗
+        </button>
+      </form>
+      <div id="login-message" class="notice" role="status"></div>
+      <details class="setup-info">
+        <summary>O que precisa estar configurado?</summary>
+        <p>
+          Banco PostgreSQL inicializado, ADMIN_EMAIL, ADMIN_PASSWORD_HASH,
+          SESSION_SECRET e SITE_URL nas variáveis seguras da hospedagem. Não há
+          senha padrão nem login local simulado.
+        </p>
+        <p>
+          Para ativar pagamentos, também configure Mercado Pago e seu webhook.
+          As instruções estão em SETUP.md no repositório.
+        </p>
+      </details>
+      <a href="index.html" class="text-link">← Voltar à loja do cliente</a>
+    </section>
+    <div id="admin-shell" class="admin-shell" hidden>
+      <aside class="admin-sidebar">
+        <a class="logo" href="index.html">PULSE<span>NUTRITION</span><i></i></a>
+        <p class="eyebrow">ADMINISTRAÇÃO</p>
+        <nav aria-label="Painel administrativo">
+          <button data-section="overview" class="selected">Visão geral</button
+          ><button data-section="products">Produtos e estoque</button
+          ><button data-section="orders">Pedidos</button
+          ><button data-section="settings">Configurações</button>
+        </nav>
+        <a href="index.html" class="text-link">Ver loja do cliente ↗</a
+        ><button id="logout-button" class="text-link">Sair da conta</button>
+      </aside>
+      <main class="admin-main">
+        <header class="admin-heading">
+          <div>
+            <p class="eyebrow">PULSE CONTROL</p>
+            <h1 id="admin-title">VISÃO <em>GERAL.</em></h1>
+          </div>
+          <span id="admin-account"></span>
+        </header>
+        <div id="admin-message" class="notice" role="status" hidden></div>
+        <section id="panel-overview">
+          <div class="stats-grid" id="admin-stats"></div>
+          <article class="admin-card">
+            <h2>PRÓXIMOS <em>PASSOS.</em></h2>
+            <div id="admin-readiness"></div>
+            <p>
+              Pagamentos são confirmados pelo Mercado Pago. A entrega é
+              gerenciada aqui; o painel não permite marcar um pagamento como
+              aprovado manualmente.
+            </p>
+          </article>
+        </section>
+        <section id="panel-products" hidden>
+          <div class="panel-toolbar">
+            <label
+              >Buscar produto<input
+                id="admin-product-search"
+                type="search"
+                placeholder="Nome ou categoria" /></label
+            ><button id="new-product" class="button lime">
+              Novo produto +
+            </button>
+          </div>
+          <div id="admin-products" class="admin-product-grid"></div>
+        </section>
+        <section id="panel-orders" hidden>
+          <div class="panel-toolbar">
+            <label
+              >Filtrar situação<select id="admin-order-filter">
+                <option value="all">Todos os pedidos</option>
+                <option value="pending">Aguardando pagamento</option>
+                <option value="paid">Pagamentos confirmados</option>
+                <option value="failed">Não concluídos</option>
+                <option value="expired">Expirados</option>
+                <option value="refunded">Estornados</option>
+              </select></label
+            ><button id="reload-orders" class="button dark">
+              Atualizar pedidos ↻
+            </button>
+          </div>
+          <div id="admin-orders"></div>
+        </section>
+        <section id="panel-settings" hidden>
+          <form id="settings-form" class="admin-card">
+            <h2>LOJA E <em>PAGAMENTOS.</em></h2>
+            <div class="form-grid">
+              <label
+                >E-mail público de contato<input
+                  name="contact_email"
+                  type="email"
+                  maxlength="254"
+                  required /></label
+              ><label
+                >WhatsApp autorizado <small>(DDI + DDD, opcional)</small
+                ><input name="whatsapp" type="tel" maxlength="15" /></label
+              ><label
+                >Frete fixo por pedido (R$)<input
+                  name="shipping_fee"
+                  type="number"
+                  min="0"
+                  max="1000"
+                  step="0.01"
+                  required
+                  placeholder="Informe o valor"
+              /></label>
+            </div>
+            <label class="check-label"
+              ><input type="checkbox" name="checkout_enabled" /> Ativar checkout
+              para produtos reais com estoque</label
+            >
+            <div id="payment-readiness" class="notice"></div>
+            <p>
+              As chaves do Mercado Pago, do banco e do login ficam nas variáveis
+              seguras da hospedagem. Não insira tokens no catálogo ou em
+              arquivos públicos.
+            </p>
+            <button class="button lime" type="submit">
+              Salvar configurações ↗
+            </button>
+          </form>
+        </section>
+      </main>
+    </div>
+    <dialog
+      id="product-editor"
+      class="product-editor"
+      aria-labelledby="editor-title"
+    >
+      <button
+        id="editor-close"
+        class="icon-btn dialog-close"
+        aria-label="Fechar edição"
+      >
+        ✕
+      </button>
+      <form id="product-form">
+        <p class="eyebrow">CATÁLOGO E INVENTÁRIO</p>
+        <h2 id="editor-title">EDITAR PRODUTO</h2>
+        <div class="form-grid">
+          <label
+            >Identificador<input
+              name="id"
+              pattern="[a-z0-9][a-z0-9_-]*"
+              maxlength="60"
+              required
+              placeholder="whey-essential" /></label
+          ><label>Nome<input name="name" maxlength="120" required /></label
+          ><label>Marca<input name="brand" maxlength="80" required /></label
+          ><label>Categoria<select name="category" required></select></label
+          ><label class="wide"
+            >Imagem <small>(assets/ ou URL HTTPS autorizada)</small
+            ><input name="image_url" maxlength="600" required /></label
+          ><label
+            >Etiqueta <small>(opcional)</small
+            ><input name="tag" maxlength="40" /></label
+          ><label class="wide"
+            >Descrição<textarea
+              name="description"
+              rows="3"
+              maxlength="3000"
+              required
+            ></textarea></label
+          ><label class="wide"
+            >Informações do rótulo<textarea
+              name="label"
+              rows="3"
+              maxlength="1800"
+            ></textarea>
+          </label>
+        </div>
+        <div class="editor-flags">
+          <label class="check-label"
+            ><input name="active" type="checkbox" /> Visível na loja</label
+          ><label class="check-label"
+            ><input name="demonstrative" type="checkbox" /> Produto
+            demonstrativo — bloquear cobrança</label
+          >
+        </div>
+        <h3>Variações, preço e estoque disponível</h3>
+        <p>
+          O estoque abaixo já desconta reservas de pagamentos pendentes.
+          Alterações concorrentes exigem recarregar o produto.
+        </p>
+        <div id="variant-editor"></div>
+        <button id="add-variant" type="button" class="text-link">
+          Adicionar variação +
+        </button>
+        <div class="notice" id="editor-message" role="alert" hidden></div>
+        <button type="submit" class="button lime" id="save-product">
+          Salvar produto ↗
+        </button>
+      </form>
+    </dialog>
+  </body>
+</html>
