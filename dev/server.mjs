@@ -1,7 +1,11 @@
 import http from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import { resolve, extname } from "node:path";
-import handler from "../server/app.js";
+import { createHandler } from "../server/app.js";
+import { getDatabase } from "../server/db.js";
+import { developmentDatabaseEnv } from "./database.mjs";
+const env = developmentDatabaseEnv();
+const handler = createHandler({ database: getDatabase(env), env });
 const root = resolve(new URL("..", import.meta.url).pathname),
   port = Number(process.env.PORT || 8000);
 const types = {
@@ -45,6 +49,6 @@ http
   })
   .listen(port, "0.0.0.0", () =>
     console.log(
-      `PULSE: servidor iniciado na porta ${port}. Banco e pagamentos dependem das variáveis configuradas.`,
+      `PULSE: servidor iniciado na porta ${port}. Banco conectado quando configurado. Login e pagamentos exigem as variáveis seguras.`,
     ),
   );

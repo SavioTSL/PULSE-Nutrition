@@ -1,5 +1,6 @@
 import { getDatabase, initializeDatabase } from "../server/db.js";
-const db = getDatabase();
+import { developmentDatabaseEnv } from "../dev/database.mjs";
+const db = getDatabase(developmentDatabaseEnv());
 if (!db)
   throw new Error(
     "Configure DATABASE_URL no ambiente seguro antes de executar.",

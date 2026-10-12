@@ -11,7 +11,9 @@
     "build": "sh scripts/build.sh",
     "test": "node --test tests/cart.test.mjs tests/backend.test.mjs",
     "db:setup": "node --env-file-if-exists=.env scripts/setup-db.mjs",
-    "admin:password": "node scripts/admin-password.mjs"
+    "admin:password": "node scripts/admin-password.mjs",
+    "db:local": "node --env-file-if-exists=.env scripts/local-db.mjs",
+    "test:db": "node --test tests/local-database.test.mjs"
   },
   "dependencies": {
     "pg": "8.23.1"

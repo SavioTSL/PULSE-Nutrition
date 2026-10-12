@@ -16,6 +16,14 @@ O servidor Node usa a porta 8000 e serve também a API. Um servidor apenas está
 
 Depois de alterar HTML, dados, CSS ou módulos JavaScript, execute `npm run build`. O diretório `public/` é gerado para publicação e não contém código de servidor, testes ou arquivos de ambiente.
 
+## PostgreSQL local persistente
+
+Com Docker disponível, execute `npm run db:local` antes de `npm start`. O comando cria PostgreSQL 17 de verdade, inicializa as tabelas e conecta automaticamente a API no desenvolvimento. Pode ser repetido sem apagar os dados ou sobrescrever o catálogo.
+
+Os dados ficam em `.local-db/data/`, ignorado pelo Git. O container usa somente um socket Unix em uma pasta privada: não publica portas e não tem rede. A autenticação local é trust, exclusiva deste ambiente de desenvolvimento; não utilize essa configuração em produção. Não existe senha administrativa padrão.
+
+Para reiniciar o banco após desligar o ambiente, execute novamente `npm run db:local`. A conexão externa `DATABASE_URL`, quando configurada, tem prioridade. Em produção e na Vercel, o backend exige essa conexão externa e nunca utiliza o banco local. O banco deste ambiente não é um serviço hospedado nem um backup de produção; preserve os dados antes de excluir o ambiente. `npm run test:db` valida inicialização repetida, rollback e persistência após reiniciar o PostgreSQL; execute somente no ambiente local, pois reinicia seu container.
+
 ## Variáveis seguras
 
 Defina os valores na seção Environment Variables do projeto na Vercel, sem publicá-los no Git. No desenvolvimento, use um `.env` local ignorado, baseado em `.env.example`. Não envie senhas, tokens ou URLs com credenciais pelo chat.
