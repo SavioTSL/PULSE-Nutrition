@@ -6,4 +6,6 @@
 - `product-*.svg`, `product-label.svg` e `favicon.svg`: ilustrações originais criadas para este projeto, sem marcas de suplementos de terceiros. São mockups, não fotografias de produtos existentes.
 - Barlow Condensed e DM Sans: Google Fonts, hospedadas localmente. Licenças SIL Open Font License incluídas em `fonts/OFL-Barlow.txt` e `fonts/OFL-DMSans.txt`.
 
-- `product-0.webp` e `product-1.webp`: imagens originais geradas por IA para representar embalagens fictícias PULSE em estilo render 3D. Não são fotografias de produtos comercializados.
+- `product-0.webp` a `product-5.webp` e versões responsivas: imagens originais geradas por IA para representar embalagens fictícias PULSE em estilo render 3D. Não são fotografias de produtos comercializados.
+
+- Fotografias em WebP e versões menores são otimizações das mesmas fotos Unsplash creditadas acima. Fontes WOFF2 são subconjuntos das fontes originais Google Fonts, mantendo suas licenças OFL.

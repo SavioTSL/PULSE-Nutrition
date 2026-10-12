@@ -59,7 +59,8 @@ export class Cart {
     )
       return false;
     const item = this.items.find((i) => i.id === id && i.variant === variant);
-    if (item) item.qty = Math.min(99, item.qty + qty);
+    if (item && item.qty + qty > 99) return false;
+    if (item) item.qty += qty;
     else this.items.push({ id, variant, qty });
     this.save();
     return true;
@@ -72,8 +73,11 @@ export class Cart {
     return true;
   }
   remove(index) {
+    if (!Number.isInteger(index) || index < 0 || index >= this.items.length)
+      return false;
     this.items.splice(index, 1);
     this.save();
+    return true;
   }
   get count() {
     return this.items.reduce((sum, i) => sum + i.qty, 0);

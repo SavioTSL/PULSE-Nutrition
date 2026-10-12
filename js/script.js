@@ -1,4 +1,4 @@
-import { imagePath, renderProductCards } from "./catalog.js";
+import { imagePath, imageSources, renderProductCards } from "./catalog.js";
 import { products, categories, money } from "./products.js";
 import { Cart, safeRead, persist } from "./cart.js";
 const $ = (s) => document.querySelector(s),
@@ -31,6 +31,7 @@ favorites = Array.isArray(favorites)
 let category = "all",
   onlyFavorites = false,
   toastTimer;
+const selectedVariants = new Map();
 function toast(message) {
   $("#toast").textContent = message;
   $("#toast").classList.add("visible");
@@ -41,7 +42,7 @@ const asset = (p) => imagePath(p.image);
 $("#category-grid").innerHTML = categories
   .map(
     (c, i) =>
-      `<button class="category-card" data-category="${i}"><img src="${imagePath(i)}" alt="" loading="lazy" width="160" height="160"><span>${c}</span><b>↗</b></button>`,
+      `<button class="category-card" data-category="${i}"><img src="${imagePath(i)}" srcset="${imageSources(i)}" sizes="(max-width:1050px) 28vw, 14vw" decoding="async" alt="" loading="lazy" width="160" height="160"><span>${c}</span><b>↗</b></button>`,
   )
   .join("");
 $("#filter-chips").innerHTML = ["Todos", ...categories]
@@ -51,6 +52,12 @@ $("#filter-chips").innerHTML = ["Todos", ...categories]
   )
   .join("");
 function renderProducts() {
+  $$(".product-card").forEach((card) =>
+    selectedVariants.set(
+      card.dataset.id,
+      card.querySelector("[data-variant]").value,
+    ),
+  );
   const query = $("#search")
     .value.trim()
     .normalize("NFD")
@@ -86,6 +93,12 @@ function renderProducts() {
   });
   $("#empty-results").hidden = list.length > 0;
   $("#product-grid").innerHTML = renderProductCards(list, favorites);
+  $$(".product-card").forEach((card) => {
+    const value = selectedVariants.get(card.dataset.id);
+    const select = card.querySelector("[data-variant]");
+    if (value && [...select.options].some((option) => option.value === value))
+      select.value = value;
+  });
 }
 function reset() {
   category = "all";
@@ -179,7 +192,9 @@ function detail(id) {
   $("#detail-add").addEventListener("click", () => {
     const qty = Number($("#detail-qty").value);
     if (!cart.add(p.id, $("#detail-variant").value, qty)) {
-      toast("Informe uma quantidade inteira de 1 a 99.");
+      toast(
+        "Use uma quantidade inteira de 1 a 99, respeitando o limite de 99 por variação no carrinho.",
+      );
       $("#detail-qty").focus();
       return;
     }
@@ -236,7 +251,9 @@ $("#product-grid").addEventListener("click", (e) => {
     favorites = added ? [...favorites, id] : favorites.filter((x) => x !== id);
     const stored = persist(favoriteKey, favorites);
     renderProducts();
-    $(`[data-favorite="${id}"]`)?.focus({ preventScroll: true });
+    ($(`[data-favorite="${id}"]`) || $("#favorites-toggle")).focus({
+      preventScroll: true,
+    });
     toast(
       stored
         ? added
@@ -245,11 +262,15 @@ $("#product-grid").addEventListener("click", (e) => {
         : "Armazenamento indisponível. Favoritos salvos apenas nesta sessão.",
     );
   } else if (add) {
-    cart.add(
+    const added = cart.add(
       add.dataset.add,
       add.closest(".product-card").querySelector("[data-variant]").value,
     );
-    toast("Produto adicionado à sua seleção.");
+    toast(
+      added
+        ? "Produto adicionado à sua seleção."
+        : "Limite de 99 unidades por produto e variação atingido.",
+    );
   } else if (details) detail(details.dataset.detail);
 });
 function renderCart() {
@@ -366,6 +387,9 @@ document.addEventListener("click", (e) => {
 window.addEventListener("resize", () => {
   if (innerWidth > 700) closeMenu();
 });
+$("#header").addEventListener("focusin", () =>
+  $("#header").classList.remove("away"),
+);
 let lastY = scrollY;
 window.addEventListener(
   "scroll",
@@ -373,7 +397,11 @@ window.addEventListener(
     const y = scrollY;
     $("#header").classList.toggle(
       "away",
-      y > 180 && y > lastY && !$$("dialog").some((d) => d.open) && menu.hidden,
+      y > 180 &&
+        y > lastY &&
+        !$$("dialog").some((d) => d.open) &&
+        menu.hidden &&
+        !$("#header").contains(document.activeElement),
     );
     lastY = y;
   },
@@ -443,12 +471,15 @@ function schedule() {
     !paused &&
     !hover &&
     !document.hidden &&
+    !$(".hero").contains(document.activeElement) &&
     !$$("dialog").some((d) => d.open)
   )
     timer = setTimeout(() => showSlide(slide + 1), 6500);
 }
 function updatePause() {
-  $("#slide-pause").textContent = paused ? "▷" : "II";
+  $("#slide-pause").innerHTML = paused
+    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7Z"/></svg>'
+    : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14M15 5v14"/></svg>';
   $("#slide-pause").ariaLabel = paused
     ? "Retomar slides automáticos"
     : "Pausar slides automáticos";

@@ -57,3 +57,17 @@ test("armazenamento indisponível não interrompe a sessão", () => {
   assert.equal(cart.add(products[0].id, products[0].variants[0]), true);
   assert.equal(cart.total, 14990);
 });
+
+test("não descarta quantidades excedentes nem remove índices inválidos", () => {
+  const cart = new Cart();
+  const p = products[0];
+  cart.add(p.id, p.variants[0], 98);
+  assert.equal(cart.add(p.id, p.variants[0], 2), false);
+  assert.equal(cart.count, 98);
+  assert.equal(cart.add(p.id, p.variants[0], 1), true);
+  assert.equal(cart.count, 99);
+  assert.equal(cart.remove(-1), false);
+  assert.equal(cart.remove(0.5), false);
+  assert.equal(cart.remove(10), false);
+  assert.equal(cart.count, 99);
+});

@@ -1739,3 +1739,81 @@ body.modal-open {
 .detail-gallery {
   overflow: hidden;
 }
+
+/* Auditoria: áreas de toque, leitura e foco */
+.favorite-btn {
+  width: 44px;
+  height: 44px;
+}
+.product-tag {
+  max-width: calc(100% - 65px);
+}
+.cart-qty button {
+  width: 44px;
+  height: 44px;
+}
+.qty-control button {
+  width: 44px;
+}
+.slider-controls > button {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+#slide-dots button {
+  width: 32px;
+  height: 44px;
+}
+#slide-dots button:after {
+  width: 23px;
+  margin: auto;
+}
+.details-btn {
+  min-height: 44px;
+}
+#clear-filters,
+#empty-reset,
+.remove-btn {
+  min-height: 44px;
+}
+.hero-art > img {
+  aspect-ratio: 1;
+  object-fit: contain;
+}
+.category-card img {
+  padding: 3px;
+}
+@media (max-width: 700px) {
+  .header-actions .icon-btn {
+    width: 44px;
+  }
+  .product-category,
+  .product-info small,
+  .card-bottom select {
+    font-size: 11px;
+  }
+  .product-info h3 {
+    font-size: 14px;
+  }
+  .category-card span {
+    font-size: 10px;
+    max-width: calc(100% - 10px);
+  }
+  .category-card b {
+    bottom: 12px;
+  }
+  .product-tag {
+    font-size: 8px;
+  }
+  .product-info .brand {
+    font-size: 8px;
+  }
+  .slider-controls {
+    gap: 8px;
+  }
+  .catalog-footnote {
+    font-size: 11px;
+  }
+}
