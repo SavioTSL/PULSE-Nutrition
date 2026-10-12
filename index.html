@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#101413" />
+    <meta
+      name="description"
+      content="Conheça a PULSE Nutrition: loja demonstrativa de suplementos com catálogo, favoritos e orçamento. Sua evolução começa aqui."
+    />
+    <title>PULSE Nutrition — Sua evolução começa aqui</title>
+    <link rel="icon" href="assets/favicon.svg" />
+    <link rel="stylesheet" href="css/fonts.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/config.js" defer></script>
+    <script type="module" src="js/script.js"></script>
+  </head>
+  <body>
+    <a class="skip" href="#catalogo">Pular para produtos</a>
+    <div class="announcement">
+      ENERGIA PARA A SUA ROTINA <span>•</span> LOJA DEMONSTRATIVA — SEM VENDAS
+      REAIS
+    </div>
+    <header id="header">
+      <a class="logo" href="#inicio" aria-label="PULSE Nutrition início"
+        >PULSE<span>NUTRITION</span><i></i
+      ></a>
+      <nav class="desktop-nav" aria-label="Principal">
+        <a href="#catalogo">Produtos</a><a href="#categorias">Categorias</a
+        ><a href="#sobre">Nossa essência</a>
+      </nav>
+      <div class="header-actions">
+        <button
+          id="search-toggle"
+          class="icon-btn"
+          aria-label="Pesquisar produtos"
+          data-icon="search"
+        ></button
+        ><button
+          id="favorites-toggle"
+          class="icon-btn"
+          aria-label="Mostrar favoritos"
+          aria-pressed="false"
+          data-icon="heart"
+        ></button
+        ><button
+          id="cart-open"
+          class="icon-btn cart-trigger"
+          aria-label="Abrir carrinho"
+        >
+          <span data-icon="bag"></span><b id="cart-count">0</b></button
+        ><button
+          id="menu-toggle"
+          class="icon-btn mobile-only"
+          aria-label="Abrir menu"
+          aria-expanded="false"
+          data-icon="menu"
+        ></button>
+      </div>
+    </header>
+    <nav id="mobile-menu" aria-label="Menu mobile" hidden>
+      <a href="#catalogo">Todos os produtos ↗</a
+      ><a href="#categorias">Categorias ↗</a
+      ><a href="#sobre">Nossa essência ↗</a
+      ><a href="#faq">Dúvidas frequentes ↗</a>
+    </nav>
+    <main>
+      <section
+        class="hero"
+        id="inicio"
+        aria-roledescription="carrossel"
+        aria-label="Destaques PULSE"
+      >
+        <img
+          class="hero-photo"
+          src="assets/athlete.jpg"
+          alt="Atleta durante treino de levantamento de peso"
+          width="1200"
+          height="800"
+        />
+        <div class="hero-lines"></div>
+        <div class="hero-copy">
+          <p class="eyebrow">
+            <span class="dot"></span> FEITO PARA O SEU MOVIMENTO
+          </p>
+          <h1 id="hero-title">SUA EVOLUÇÃO<br />COMEÇA <em>AQUI.</em></h1>
+          <p id="hero-description">
+            Sua rotina. Seu ritmo. Suas escolhas.<br />Encontre os essenciais
+            para acompanhar você.
+          </p>
+          <a class="button lime" href="#catalogo"
+            >Explorar produtos <span>↗</span></a
+          >
+          <div class="hero-note">
+            <span>01 /</span> UM NOVO RITMO. TODOS OS DIAS.
+          </div>
+        </div>
+        <div class="hero-art">
+          <div class="orbit"></div>
+          <span class="vertical-label">PULSE COLLECTION — EST. 2026</span
+          ><img
+            id="hero-product"
+            src="assets/product-0.svg"
+            width="600"
+            height="600"
+            alt="Embalagem demonstrativa Whey PULSE"
+          />
+          <div class="art-caption">
+            <span>ESSENTIAL COLLECTION</span
+            ><b id="hero-product-name">WHEY PROTEIN</b
+            ><small>EMBALAGEM ILUSTRATIVA</small>
+          </div>
+          <span class="hero-star">✳</span>
+        </div>
+        <div class="slider-controls">
+          <button id="slide-prev" aria-label="Slide anterior">←</button>
+          <div id="slide-dots"></div>
+          <button id="slide-next" aria-label="Próximo slide">→</button
+          ><button id="slide-pause" aria-label="Pausar slides automáticos">
+            II
+          </button>
+        </div>
+      </section>
+      <div class="ticker" aria-hidden="true">
+        <span>MOVE YOUR BODY</span> ✳ <span>FIND YOUR PULSE</span> ✳
+        <span>MAKE IT A ROUTINE</span> ✳ <span>MOVE YOUR BODY</span>
+      </div>
+      <section class="section categories" id="categorias">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">ESCOLHAS QUE ACOMPANHAM VOCÊ</p>
+            <h2>QUAL É O SEU <em>RITMO?</em></h2>
+          </div>
+          <a href="#catalogo" class="text-link">Ver todos os produtos ↗</a>
+        </div>
+        <div id="category-grid" class="category-grid"></div>
+      </section>
+      <section class="section catalog" id="catalogo">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">SELEÇÃO DA CASA · MAIS VENDIDOS ILUSTRATIVOS</p>
+            <h2>SEUS PRÓXIMOS <em>ESSENCIAIS.</em></h2>
+          </div>
+          <span class="demo-label">CATÁLOGO DEMONSTRATIVO</span>
+        </div>
+        <div class="catalog-controls">
+          <label class="search-field"
+            ><span data-icon="search"></span
+            ><input
+              id="search"
+              type="search"
+              placeholder="O que você procura?"
+              aria-label="Pesquisar pelo nome" /></label
+          ><label class="sort-field"
+            >Ordenar por
+            <select id="sort">
+              <option value="featured">Destaques</option>
+              <option value="price-up">Menor preço</option>
+              <option value="price-down">Maior preço</option>
+              <option value="name">Nome A–Z</option>
+            </select></label
+          >
+        </div>
+        <div class="filter-row">
+          <div id="filter-chips" class="filter-chips"></div>
+          <label class="price-filter"
+            >Até <output id="price-output">R$ 250,00</output
+            ><input
+              id="price"
+              type="range"
+              min="10"
+              max="250"
+              value="250"
+              step="5"
+              aria-label="Preço máximo em reais"
+          /></label>
+        </div>
+        <div class="results-line">
+          <p id="result-count" aria-live="polite"></p>
+          <button id="clear-filters" class="text-link">Limpar filtros</button>
+        </div>
+        <div id="product-grid" class="product-grid"></div>
+        <div id="empty-results" class="empty-state" hidden>
+          <span>⌕</span>
+          <h3>Nenhum produto por aqui.</h3>
+          <p>Tente outro nome, categoria ou faixa de preço.</p>
+          <button class="button dark" id="empty-reset">
+            Ver todos os produtos ↗
+          </button>
+        </div>
+        <p class="catalog-footnote">
+          Produtos, preços e informações são ilustrativos. Nenhuma compra ou
+          pagamento é realizado neste site.
+        </p>
+      </section>
+      <section class="promo reveal">
+        <div>
+          <p class="eyebrow">O ESSENCIAL É CONTINUAR</p>
+          <h2>MENOS DESCULPAS.<br />MAIS <em>MOVIMENTO.</em></h2>
+          <p>Descubra a seleção PULSE para o seu dia a dia.</p>
+          <a class="button lime" href="#catalogo">Encontre seu essencial ↗</a
+          ><small>Banner demonstrativo. Sem oferta ou desconto real.</small>
+        </div>
+        <img
+          src="assets/product-1.svg"
+          alt="Creatina PULSE, produto fictício"
+          width="600"
+          height="600"
+          loading="lazy"
+        /><span class="promo-type" aria-hidden="true">PULSE</span>
+      </section>
+      <section class="section advantages reveal">
+        <p class="eyebrow">UMA EXPERIÊNCIA NO SEU RITMO</p>
+        <div class="advantages-grid">
+          <article>
+            <span data-icon="grid"></span>
+            <h3>Escolha com clareza</h3>
+            <p>
+              Categorias, variações e informações organizadas para uma navegação
+              simples.
+            </p>
+          </article>
+          <article>
+            <span data-icon="bag"></span>
+            <h3>Sua seleção, salva</h3>
+            <p>
+              Seu carrinho e favoritos ficam neste navegador para você continuar
+              depois.
+            </p>
+          </article>
+          <article>
+            <span data-icon="message"></span>
+            <h3>Conversa direta</h3>
+            <p>
+              Monte sua seleção e prepare um resumo para solicitar um orçamento.
+            </p>
+          </article>
+        </div>
+      </section>
+      <section class="about section reveal" id="sobre">
+        <div class="about-art">
+          <img
+            src="assets/gym.jpg"
+            alt="Ambiente de academia com equipamentos de treino"
+            width="1200"
+            height="800"
+            loading="lazy"
+          /><span class="about-photo-word">FIND<br />YOUR<br />PULSE.</span
+          ><small>FIND YOUR PULSE.</small>
+        </div>
+        <div>
+          <p class="eyebrow">MAIS QUE UMA MARCA. UMA ATITUDE.</p>
+          <h2>A VIDA ACONTECE<br />EM <em>MOVIMENTO.</em></h2>
+          <p>
+            A PULSE nasce de uma ideia simples: cada pessoa tem seu próprio
+            ritmo. Uma identidade para quem valoriza a rotina, as escolhas
+            conscientes e o prazer de se movimentar.
+          </p>
+          <p>
+            Este é um projeto demonstrativo de e-commerce. A marca e seus
+            produtos são fictícios, criados para apresentar uma experiência de
+            compra intuitiva e contemporânea.
+          </p>
+          <a href="#catalogo" class="text-link">Conheça a coleção ↗</a>
+        </div>
+      </section>
+      <section class="section faq reveal" id="faq">
+        <div>
+          <p class="eyebrow">SEM COMPLICAÇÃO</p>
+          <h2>BOAS PERGUNTAS.<br /><em>RESPOSTAS DIRETAS.</em></h2>
+        </div>
+        <div>
+          <details>
+            <summary>Posso comprar de verdade neste site?</summary>
+            <p>
+              Não. Esta é uma loja demonstrativa. O carrinho monta um orçamento
+              ilustrativo, sem pagamento, confirmação de pedido ou venda real.
+            </p>
+          </details>
+          <details>
+            <summary>Como funciona o orçamento?</summary>
+            <p>
+              Adicione produtos e variações ao carrinho e copie o resumo. Se um
+              número autorizado for configurado, você poderá abrir o WhatsApp e
+              revisar a mensagem antes de enviar.
+            </p>
+          </details>
+          <details>
+            <summary>Os dados dos produtos são reais?</summary>
+            <p>
+              Não. Embalagens, rótulos, preços e seleção de mais vendidos são
+              ilustrativos. Não representam recomendações de consumo. Para
+              suplementação, procure orientação profissional.
+            </p>
+          </details>
+          <details>
+            <summary>Meu carrinho fica salvo?</summary>
+            <p>
+              Sim, neste navegador, quando o armazenamento local está
+              disponível. Você pode remover os itens a qualquer momento; não
+              enviamos esses dados a um servidor.
+            </p>
+          </details>
+        </div>
+      </section>
+      <section class="newsletter">
+        <div>
+          <p class="eyebrow">FIQUE NO NOSSO RITMO</p>
+          <h2>UMA DOSE DE <em>NOVIDADES.</em></h2>
+          <p>Conteúdo, lançamentos e inspiração para sua rotina.</p>
+        </div>
+        <div>
+          <form id="newsletter-form">
+            <label class="sr-only" for="email">Seu e-mail</label
+            ><input
+              id="email"
+              type="email"
+              placeholder="Seu melhor e-mail"
+              required
+              maxlength="254"
+            /><button type="submit" aria-label="Solicitar inscrição">↗</button>
+          </form>
+          <small id="newsletter-note"
+            >Demonstração visual. Nenhum e-mail será coletado.</small
+          >
+        </div>
+      </section>
+    </main>
+    <footer>
+      <div class="footer-top">
+        <a class="logo" href="#inicio">PULSE<span>NUTRITION</span><i></i></a>
+        <p>Sua evolução começa aqui.</p>
+        <a href="#inicio" class="text-link">Voltar ao topo ↑</a>
+      </div>
+      <div class="footer-links">
+        <a href="#catalogo">Produtos</a><a href="#sobre">Sobre a marca</a
+        ><a href="#faq">Perguntas frequentes</a
+        ><button id="privacy-open" class="text-link">Privacidade</button>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 PULSE Nutrition · Projeto de portfólio</span
+        ><span>Produtos fictícios. Sem vendas ou pagamentos reais.</span>
+      </div>
+    </footer>
+    <dialog
+      id="product-dialog"
+      class="product-dialog"
+      aria-labelledby="detail-title"
+    >
+      <button
+        class="dialog-close icon-btn"
+        aria-label="Fechar detalhes"
+        data-close
+        data-icon="close"
+      ></button>
+      <div id="product-detail"></div>
+    </dialog>
+    <dialog id="cart-dialog" class="cart-dialog" aria-labelledby="cart-title">
+      <div class="drawer-heading">
+        <h2 id="cart-title">SUA <em>SELEÇÃO.</em></h2>
+        <button
+          class="icon-btn"
+          aria-label="Fechar carrinho"
+          data-close
+          data-icon="close"
+        ></button>
+      </div>
+      <p class="drawer-note">Seu próximo passo começa com uma escolha.</p>
+      <div id="cart-items"></div>
+      <div id="cart-footer">
+        <div class="subtotal">
+          <span>Subtotal ilustrativo</span><strong id="cart-total"></strong>
+        </div>
+        <p>Frete e disponibilidade a consultar. Não é um checkout.</p>
+        <button id="order-button" class="button lime">
+          Copiar resumo do orçamento ↗</button
+        ><label class="sr-only" for="order-summary"
+          >Resumo do orçamento para copiar</label
+        ><textarea id="order-summary" readonly hidden></textarea>
+      </div>
+    </dialog>
+    <dialog
+      id="privacy-dialog"
+      class="privacy-dialog"
+      aria-labelledby="privacy-title"
+    >
+      <button
+        class="dialog-close icon-btn"
+        data-close
+        aria-label="Fechar privacidade"
+        data-icon="close"
+      ></button>
+      <h2 id="privacy-title">Privacidade</h2>
+      <p>
+        Este site demonstrativo armazena apenas favoritos e carrinho no
+        LocalStorage deste navegador. Não há cadastro, pagamento, cookies de
+        análise ou coleta de e-mail ativa por padrão.
+      </p>
+      <p>
+        As fontes Google Fonts e as imagens são hospedadas junto do site, sem
+        chamadas externas para carregá-las. Ao abrir o WhatsApp, você acessa um
+        serviço externo e decide se quer enviar a mensagem.
+      </p>
+      <button id="clear-data" class="button dark">
+        Apagar carrinho e favoritos
+      </button>
+    </dialog>
+    <div id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>
