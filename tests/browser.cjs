@@ -156,6 +156,15 @@ const { chromium } = require(process.env.PLAYWRIGHT_PATH || "playwright");
       ),
     true,
   );
+  const noJS = await browser.newContext({ javaScriptEnabled: false });
+  const fallback = await noJS.newPage();
+  await fallback.goto("http://127.0.0.1:8000");
+  assert.equal(
+    await fallback.locator(".product-card").count(),
+    8,
+    "catálogo visível sem inicialização JavaScript",
+  );
+  await noJS.close();
   await browser.close();
   console.log(
     "PASS: desktop/mobile, pesquisa, filtros, ordenação, variações, carrinho, cálculos, persistência, favoritos, clipboard, WhatsApp, modais, menu, slider, reduced-motion e imagens. Nenhum erro JavaScript.",

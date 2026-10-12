@@ -1,3 +1,4 @@
+import { imagePath, renderProductCards } from "./catalog.js";
 import { products, categories, money } from "./products.js";
 import { Cart, safeRead, persist } from "./cart.js";
 const $ = (s) => document.querySelector(s),
@@ -36,11 +37,11 @@ function toast(message) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => $("#toast").classList.remove("visible"), 3500);
 }
-const asset = (p) => `assets/product-${p.image}.svg`;
+const asset = (p) => imagePath(p.image);
 $("#category-grid").innerHTML = categories
   .map(
     (c, i) =>
-      `<button class="category-card" data-category="${i}"><img src="assets/product-${i}.svg" alt="" loading="lazy" width="160" height="160"><span>${c}</span><b>↗</b></button>`,
+      `<button class="category-card" data-category="${i}"><img src="${imagePath(i)}" alt="" loading="lazy" width="160" height="160"><span>${c}</span><b>↗</b></button>`,
   )
   .join("");
 $("#filter-chips").innerHTML = ["Todos", ...categories]
@@ -84,12 +85,7 @@ function renderProducts() {
     b.setAttribute("aria-pressed", String(active));
   });
   $("#empty-results").hidden = list.length > 0;
-  $("#product-grid").innerHTML = list
-    .map(
-      (p) =>
-        `<article class="product-card" data-id="${p.id}"><div class="product-visual"><button data-detail="${p.id}" aria-label="Ver detalhes de ${p.name}"><img src="${asset(p)}" alt="Embalagem ilustrativa ${p.name}" width="400" height="400" loading="lazy"></button><span class="product-tag">${p.tag}</span><button class="icon-btn favorite-btn" data-favorite="${p.id}" aria-label="${favorites.includes(p.id) ? "Remover" : "Adicionar"} ${p.name} ${favorites.includes(p.id) ? "dos" : "aos"} favoritos" aria-pressed="${favorites.includes(p.id)}">${icon("heart")}</button></div><div class="product-info"><p class="brand">PULSE NUTRITION · DEMO</p><h3>${p.name}</h3><p class="product-category">${p.category}</p><div class="price">${money(p.price)}</div><small>Preço ilustrativo</small><div class="card-bottom"><select aria-label="Variação de ${p.name}" data-variant>${p.variants.map((v) => `<option>${v}</option>`).join("")}</select><button class="add-btn" data-add="${p.id}" aria-label="Adicionar ${p.name} ao carrinho">+</button></div><button class="details-btn" data-detail="${p.id}">Ver detalhes <span>↗</span></button></div></article>`,
-    )
-    .join("");
+  $("#product-grid").innerHTML = renderProductCards(list, favorites);
 }
 function reset() {
   category = "all";
@@ -422,7 +418,7 @@ function showSlide(i) {
   const s = slides[slide];
   $("#hero-title").innerHTML = s.title;
   $("#hero-description").innerHTML = s.description;
-  $("#hero-product").src = `assets/product-${s.image}.svg`;
+  $("#hero-product").src = imagePath(s.image);
   $("#hero-product").alt = `Embalagem demonstrativa ${s.name}`;
   $("#hero-product-name").textContent = s.name;
   $$("[data-slide]").forEach((b) =>

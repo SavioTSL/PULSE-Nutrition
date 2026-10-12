@@ -5,3 +5,5 @@
 - Fotografias sob a [licença Unsplash](https://unsplash.com/license), que permite baixar e utilizar imagens gratuitamente, inclusive para uso comercial. O projeto usa as fotos como contexto esportivo, sem sugerir endosso das pessoas fotografadas à marca fictícia. Não revenda as imagens isoladamente.
 - `product-*.svg`, `product-label.svg` e `favicon.svg`: ilustrações originais criadas para este projeto, sem marcas de suplementos de terceiros. São mockups, não fotografias de produtos existentes.
 - Barlow Condensed e DM Sans: Google Fonts, hospedadas localmente. Licenças SIL Open Font License incluídas em `fonts/OFL-Barlow.txt` e `fonts/OFL-DMSans.txt`.
+
+- `product-0.webp` e `product-1.webp`: imagens originais geradas por IA para representar embalagens fictícias PULSE em estilo render 3D. Não são fotografias de produtos comercializados.
